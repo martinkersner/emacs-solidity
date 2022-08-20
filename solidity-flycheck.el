@@ -228,10 +228,13 @@ no .soliumrc.json is found, `project-roots' is used."
 (defun solidity-flycheck--solc-cmd ()
   `(,solidity-solc-path
     (eval
-     (when (solc-gt-0.6.0)
-       `("--no-color"
-         ,@(solidity-flycheck--solc-allow-paths-opt)
-         ,@(solidity-flycheck--solc-remappings-opt))))
+     (when t
+       `(
+         "--abi"
+         ,@(solidity-flycheck--solc-remappings-opt)
+         )
+       )
+     )
     source-inplace))
 
 (flycheck-define-command-checker 'solidity-checker
@@ -240,6 +243,10 @@ no .soliumrc.json is found, `project-roots' is used."
   :error-patterns '(
                     ;; Solidity >= 0.6.0 error formats
                     (error line-start "Error: " (message) "\n" (zero-or-more whitespace) "--> " (file-name) ":" line ":" column)
+                    (error line-start "SyntaxError: " (message) "\n" (zero-or-more whitespace) "--> " (file-name) ":" line ":" column ":")
+                    (error line-start "ParserError: " (message) "\n" (zero-or-more whitespace) "--> " (file-name) ":" line ":" column ":")
+                    (error line-start "DeclarationError: " (message) "\n" (zero-or-more whitespace) "--> " (file-name) ":" line ":" column ":")
+                    ;; (warning line-start "Warning: " (message) "\n" (zero-or-more whitespace) "--> " (file-name))
                     (warning line-start "Warning: " (message) "\n" (zero-or-more whitespace) "--> " (file-name) ":" line ":" column)
 
                     ;; Solidity < 0.6.0 error formats
